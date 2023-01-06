@@ -7,13 +7,12 @@ abstract class Creator
     public abstract IImposto FactoryMethod();
 
 
-    public string SomeCalculoDeImposto()
+    public string SomeCalculoDeImposto(decimal valor)
     {
 
         var product = FactoryMethod();
 
-        var result = "Calculo global: "
-            + product.CalculoDeImposto();
+        var result = $"taxa : {product.CalculoDeImposto(valor)}";
         return result;
     }
 }
@@ -21,10 +20,6 @@ abstract class Creator
 
 class BrasilCreator : Creator
 {
-    // Note that the signature of the method still uses the abstract product
-    // type, even though the concrete product is actually returned from the
-    // method. This way the Creator can stay independent of concrete product
-    // classes.
     public override IImposto FactoryMethod()
     {
         return new Brasil();
@@ -42,24 +37,26 @@ class ItaliaCreator : Creator
 
 public interface IImposto
 {
-    string CalculoDeImposto();
+    decimal CalculoDeImposto(decimal valor);
 }
 
-// Concrete Products provide various implementations of the Product
-// interface.
 class Brasil : IImposto
 {
-    public string CalculoDeImposto()
+    private const decimal Taxa = 5.1m; 
+
+    public decimal CalculoDeImposto(decimal valor)
     {
-        return "Imposto do Brasil";
+        return (valor * (Taxa/100)) + valor;
     }
 }
 
 class Italia : IImposto
 {
-    public string CalculoDeImposto()
+    private const decimal Taxa = 8.1m; 
+    
+    public decimal CalculoDeImposto(decimal valor)
     {
-        return "Imposto da Italia";
+        return (valor * (Taxa/100)) + valor;
     }
 }
 
@@ -68,32 +65,18 @@ class Client
     public void Main()
     {
         Console.WriteLine("App: Launched with the BrasilCreator.");
-        ClientCode(new BrasilCreator());
-
-        Console.WriteLine("");
+        ClientCode(new BrasilCreator(), 10);
 
         Console.WriteLine("App: Launched with the ItaliaCreator.");
-        ClientCode(new ItaliaCreator());
+        ClientCode(new ItaliaCreator(), 10);
 
-        Console.WriteLine("App: Launched with the ItaliaCreator.");
-        ClientCode(new Italia());
     }
 
-    // The client code works with an instance of a concrete creator, albeit
-    // through its base interface. As long as the client keeps working with
-    // the creator via the base interface, you can pass it any creator's
-    // subclass.
-    public void ClientCode(Creator creator)
+    public void ClientCode(Creator creator, decimal valor)
     {
         // ...
-        Console.WriteLine(creator.SomeCalculoDeImposto());
+        Console.WriteLine(creator.SomeCalculoDeImposto(valor));
         // ...
     }
 
-     public void ClientCode(IImposto imposto)
-    {
-        // ...
-        Console.WriteLine(imposto.CalculoDeImposto());
-        // ...
-    }
 }
